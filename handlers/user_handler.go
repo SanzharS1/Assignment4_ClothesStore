@@ -19,7 +19,12 @@ func RegisterUserHandler(store *repository.MemoryStore) http.HandlerFunc {
 
 		var u models.User
 		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
-			http.Error(w, `{"error":"invalid json"}`, http.StatusBadRequest)
+			http.Error(w, `{"error":"invalid json body"}`, http.StatusBadRequest)
+			return
+		}
+
+		if u.Name == "" || u.Email == "" || u.Password == "" {
+			http.Error(w, `{"error":"name, email and password are required"}`, http.StatusBadRequest)
 			return
 		}
 
