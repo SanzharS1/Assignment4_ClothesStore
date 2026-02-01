@@ -1,9 +1,9 @@
 package services
 
 import (
-	"time"
-
 	"clothesstore/repository"
+	"log"
+	"time"
 )
 
 type OrderWorker struct {
@@ -21,8 +21,10 @@ func NewOrderWorker(store *repository.MemoryStore) *OrderWorker {
 func (w *OrderWorker) Start() {
 	go func() {
 		for orderID := range w.queue {
+			log.Printf("processing order %d", orderID)
 			time.Sleep(2 * time.Second)
 			_ = w.store.UpdateOrderStatus(orderID, "processed")
+			log.Printf("order %d processed", orderID)
 		}
 	}()
 }
