@@ -22,7 +22,9 @@ func ProductsHandler(store *repository.MemoryStore) http.HandlerFunc {
 		case http.MethodPost:
 			var p models.Product
 			if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
-				http.Error(w, `{"error":"invalid json"}`, http.StatusBadRequest)
+				writeJSON(w, http.StatusBadRequest, map[string]string{
+					"error": "invalid json",
+				})
 				return
 			}
 			created, _ := store.CreateProduct(p)
@@ -30,7 +32,9 @@ func ProductsHandler(store *repository.MemoryStore) http.HandlerFunc {
 			json.NewEncoder(w).Encode(created)
 
 		default:
-			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{
+				"error": "method not allowed",
+			})
 		}
 	}
 }
@@ -42,7 +46,9 @@ func ProductByIDHandler(store *repository.MemoryStore) http.HandlerFunc {
 		idStr := strings.TrimPrefix(r.URL.Path, "/products/")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			http.Error(w, `{"error":"invalid id"}`, http.StatusBadRequest)
+			writeJSON(w, http.StatusBadRequest, map[string]string{
+				"error": "invalid id",
+			})
 			return
 		}
 
@@ -50,7 +56,9 @@ func ProductByIDHandler(store *repository.MemoryStore) http.HandlerFunc {
 		case http.MethodGet:
 			p, err := store.GetProductByID(id)
 			if err != nil {
-				http.Error(w, `{"error":"not found"}`, http.StatusNotFound)
+				writeJSON(w, http.StatusNotFound, map[string]string{
+					"error": "not found",
+				})
 				return
 			}
 			json.NewEncoder(w).Encode(p)
@@ -58,25 +66,32 @@ func ProductByIDHandler(store *repository.MemoryStore) http.HandlerFunc {
 		case http.MethodPut:
 			var p models.Product
 			if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
-				http.Error(w, `{"error":"invalid json"}`, http.StatusBadRequest)
+				writeJSON(w, http.StatusBadRequest, map[string]string{
+					"error": "invalid json",
+				})
 				return
 			}
 			updated, err := store.UpdateProduct(id, p)
 			if err != nil {
-				http.Error(w, `{"error":"not found"}`, http.StatusNotFound)
+				writeJSON(w, http.StatusNotFound, map[string]string{
+					"error": "not found",
+				})
 				return
 			}
 			json.NewEncoder(w).Encode(updated)
 
 		case http.MethodDelete:
 			if err := store.DeleteProduct(id); err != nil {
-				http.Error(w, `{"error":"not found"}`, http.StatusNotFound)
+				writeJSON(w, http.StatusNotFound, map[string]string{
+					"error": "not found",
+				})
 				return
 			}
 			json.NewEncoder(w).Encode(map[string]string{"result": "deleted"})
 
 		default:
-			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{
+				"error": "method not allowed"})
 		}
 	}
 }
